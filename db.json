@@ -5,22 +5,24 @@
       "name": "Áo Thun Nam Cao Cấp",
       "price": 299000,
       "image": "https://i.pinimg.com/736x/a9/70/f1/a970f1dd289cc0d48913aab1953ae8de.jpg",
-      "description": "Chất cotton mềm mại, thoáng "
+      "description": "Chất cotton mềm mại, thoáng ",
+      "category": "Áo"
     },
     {
       "id": "2",
       "name": "Quần Jean Rách Nhẹ",
       "price": 449000,
       "image": "https://i.pinimg.com/1200x/a5/63/79/a56379ff0b93ddc6725f976d31699393.jpg",
-      "description": "Phong cách trẻ trung"
+      "description": "Phong cách trẻ trung",
+      "category": "Quần "
     },
     {
-      "id": "f577",
-      "name": "Áo Sơ Mi Trắng",
-      "price": 90000,
-      "image": "https://i.pinimg.com/1200x/4b/b6/05/4bb60531695ce9c165c99b8e17b6d201.jpg",
+      "id": "262a",
+      "name": "Áo sơ mi",
+      "price": 100000,
+      "image": "https://i.pinimg.com/736x/35/20/e8/3520e8a7daca08cb1c71af50d01b0943.jpg",
       "category": "Áo",
-      "description": "Áo đẹp giá rẻ"
+      "description": "Đẹp thoáng mát"
     }
   ]
 }

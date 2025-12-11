@@ -18,16 +18,17 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import ProductCard from '@/components/Product/ProductCard.vue'
-import { getProducts } from '@/api.js'
+import ProductService from '@/services/ProductService.js'  // <-- Đổi import thành Service mới
 
 const products = ref([])
 
 onMounted(async () => {
   try {
-    const res = await getProducts()
+    const res = await ProductService.list()  // <-- Đổi gọi hàm thành .list()
     products.value = res.data
   } catch (err) {
     console.error('Lỗi tải sản phẩm:', err)
+    alert('Không thể tải sản phẩm. Kiểm tra json-server!')
   }
 })
 </script>

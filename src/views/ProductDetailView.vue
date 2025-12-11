@@ -62,14 +62,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getProductById } from '@/api.js'
-
+import ProductService from '@/services/ProductService.js'
 const route = useRoute()
 const product = ref(null)
 
 onMounted(async () => {
   try {
-    const res = await getProductById(route.params.id)
+   const res = await ProductService.getById(route.params.id)
     product.value = res.data
   } catch (err) {
     console.error('Không tìm thấy sản phẩm:', err)

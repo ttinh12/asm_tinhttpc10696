@@ -9,7 +9,6 @@
       </button>
     </div>
 
-    <!-- Bảng sản phẩm -->
     <div class="card shadow border-0">
       <div class="card-body">
         <div class="table-responsive">
@@ -28,7 +27,7 @@
               <tr v-for="(p, index) in products" :key="p.id">
                 <td>{{ index + 1 }}</td>
                 <td>
-                  <img :src="p.image" class="rounded" width="60" height="60" style="object-fit: cover;">
+                  <img :src="p.image" class="rounded" width="60" height="60" style="object-fit: cover;" alt="product">
                 </td>
                 <td class="fw-bold">{{ p.name }}</td>
                 <td class="text-danger fw-bold">{{ formatPrice(p.price) }}đ</td>
@@ -41,7 +40,7 @@
             </tbody>
           </table>
 
-          <!-- Thông báo khi chưa có sản phẩm -->
+          <!-- Thông báo khi chưa có dữ liệu -->
           <div v-if="products.length === 0" class="text-center py-5 text-muted">
             <h4>Chưa có sản phẩm nào</h4>
             <p>Hãy thêm sản phẩm đầu tiên!</p>
@@ -63,11 +62,21 @@
           <div class="modal-body">
             <form @submit.prevent="saveProduct">
               <div class="row g-3">
-                <div class="col-md-8"><input v-model="form.name" class="form-control" placeholder="Tên sản phẩm" required></div>
-                <div class="col-md-4"><input v-model.number="form.price" type="number" class="form-control" placeholder="Giá" required></div>
-                <div class="col-12"><input v-model="form.image" class="form-control" placeholder="URL ảnh" required></div>
-                <div class="col-md-6"><input v-model="form.category" class="form-control" placeholder="Danh mục (tùy chọn)"></div>
-                <div class="col-12"><textarea v-model="form.description" class="form-control" rows="3" placeholder="Mô tả"></textarea></div>
+                <div class="col-md-8">
+                  <input v-model="form.name" class="form-control" placeholder="Tên sản phẩm" required>
+                </div>
+                <div class="col-md-4">
+                  <input v-model.number="form.price" type="number" class="form-control" placeholder="Giá" required>
+                </div>
+                <div class="col-12">
+                  <input v-model="form.image" class="form-control" placeholder="URL ảnh" required>
+                </div>
+                <div class="col-md-6">
+                  <input v-model="form.category" class="form-control" placeholder="Danh mục (tùy chọn)">
+                </div>
+                <div class="col-12">
+                  <textarea v-model="form.description" class="form-control" rows="3" placeholder="Mô tả"></textarea>
+                </div>
               </div>
               <div class="mt-4 text-end">
                 <button type="button" @click="closeModal" class="btn btn-secondary me-2">Hủy</button>
@@ -86,7 +95,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getProducts, createProduct, updateProduct, deleteProduct } from '@/api.js'
+import ProductService from '@/services/ProductService.js'  // Đảm bảo đường dẫn đúng
 
 const products = ref([])
 const showAddModal = ref(false)
@@ -101,29 +110,32 @@ const form = ref({
 
 const loadProducts = async () => {
   try {
-    const res = await getProducts()
+    const res = await ProductService.list()
     products.value = res.data
+    console.log('Admin load sản phẩm thành công:', products.value)  // Debug để bạn thấy
   } catch (err) {
     console.error('Lỗi load sản phẩm:', err)
+    alert('Không thể tải sản phẩm. Kiểm tra json-server!')
   }
 }
 
-onMounted(loadProducts)
+// BẮT BUỘC PHẢI GỌI loadProducts TRONG onMounted
+onMounted(() => {
+  loadProducts()
+})
 
 const saveProduct = async () => {
   try {
     if (editingProduct.value) {
-      // Sửa: dùng id hiện có
-      await updateProduct(editingProduct.value.id, form.value)
+      await ProductService.update(editingProduct.value.id, form.value)
     } else {
-      // Thêm mới: ĐỪNG tự tạo id → để json-server tự sinh
-      await createProduct(form.value)  // XÓA DÒNG { ...form.value, id: Date.now() }
+      await ProductService.create(form.value)
     }
     closeModal()
     loadProducts()
   } catch (err) {
-    alert('Lỗi khi lưu sản phẩm!')
-    console.error(err)
+    console.error('Lỗi lưu:', err)
+    alert('Lưu thất bại!')
   }
 }
 
@@ -134,13 +146,13 @@ const editProduct = (p) => {
 }
 
 const removeProduct = async (id) => {
-  if (confirm('Xóa sản phẩm này thật chứ?')) {
+  if (confirm('Xóa thật chứ?')) {
     try {
-      await deleteProduct(id)  // id đã đúng kiểu number/string từ db
+      await ProductService.delete(id)
       loadProducts()
     } catch (err) {
-      alert('Xóa thất bại! Kiểm tra console')
-      console.error(err)
+      console.error('Lỗi xóa:', err)
+      alert('Xóa thất bại!')
     }
   }
 }
@@ -155,7 +167,13 @@ const formatPrice = (price) => price.toLocaleString('vi-VN')
 </script>
 
 <style scoped>
-.modal-backdrop { background: rgba(0,0,0,0.5); }
-.card { border-radius: 16px; }
-.btn:hover { transform: translateY(-2px); }
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+.card {
+  border-radius: 16px;
+}
+.btn:hover {
+  transform: translateY(-2px);
+}
 </style>

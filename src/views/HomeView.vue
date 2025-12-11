@@ -46,16 +46,15 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import ProductCard from '@/components/Product/ProductCard.vue' // Giữ nguyên import của bạn
-import { getProducts } from '@/api.js'
-
+import ProductCard from '@/components/Product/ProductCard.vue'
+import ProductService from '@/services/ProductService.js'
+const ProductModel = ProductService
 const featured = ref([])
 const newest = ref([])
 
 onMounted(async () => {
   try {
-    const res = await getProducts()
-    console.log('Dữ liệu từ API:', res.data) // Thêm dòng này để kiểm tra console
+   const res = await ProductModel.list();
     featured.value = res.data.slice(0, 8)
     newest.value = res.data.slice(-8).reverse()
   } catch (err) {

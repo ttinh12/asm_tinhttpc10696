@@ -4,7 +4,7 @@
       <h2 class="text-primary fw-bold">
         Quản lý sản phẩm
       </h2>
-      <button @click="showAddModal = true" class="btn btn-success btn-lg shadow">
+      <button @click="openAddModal" class="btn btn-success btn-lg shadow">
         Thêm sản phẩm mới
       </button>
     </div>
@@ -20,6 +20,7 @@
                 <th>Tên sản phẩm</th>
                 <th>Giá</th>
                 <th>Danh mục</th>
+                <th>Biến thể</th>
                 <th class="text-center">Hành động</th>
               </tr>
             </thead>
@@ -27,20 +28,22 @@
               <tr v-for="(p, index) in products" :key="p.id">
                 <td>{{ index + 1 }}</td>
                 <td>
-                  <img :src="p.image" class="rounded" width="60" height="60" style="object-fit: cover;" alt="product">
+                  <img :src="p.image" class="rounded" width="60" height="60" style="object-fit: cover;">
                 </td>
                 <td class="fw-bold">{{ p.name }}</td>
                 <td class="text-danger fw-bold">{{ formatPrice(p.price) }}đ</td>
                 <td><span class="badge bg-info">{{ p.category || 'Chưa phân loại' }}</span></td>
+                <td>
+                  <span class="badge bg-secondary">{{ (p.variants || []).length }} màu</span>
+                </td>
                 <td class="text-center">
-                  <button @click="editProduct(p)" class="btn btn-warning btn-sm me-2">Sửa</button>
+                  <button @click="openEditModal(p)" class="btn btn-warning btn-sm me-2">Sửa</button>
                   <button @click="removeProduct(p.id)" class="btn btn-danger btn-sm">Xóa</button>
                 </td>
               </tr>
             </tbody>
           </table>
 
-          <!-- Thông báo khi chưa có dữ liệu -->
           <div v-if="products.length === 0" class="text-center py-5 text-muted">
             <h4>Chưa có sản phẩm nào</h4>
             <p>Hãy thêm sản phẩm đầu tiên!</p>
@@ -49,9 +52,9 @@
       </div>
     </div>
 
-    <!-- Modal Thêm/Sửa -->
-    <div class="modal fade" :class="{ 'show d-block': showAddModal }" tabindex="-1" v-if="showAddModal">
-      <div class="modal-dialog modal-lg">
+    <!-- Modal Thêm/Sửa (có phần biến thể) -->
+    <div class="modal fade" :class="{ 'show d-block': showModal }" tabindex="-1" v-if="showModal">
+      <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <div class="modal-header bg-primary text-white">
             <h5 class="modal-title">
@@ -63,21 +66,54 @@
             <form @submit.prevent="saveProduct">
               <div class="row g-3">
                 <div class="col-md-8">
-                  <input v-model="form.name" class="form-control" placeholder="Tên sản phẩm" required>
+                  <label class="form-label fw-bold">Tên sản phẩm</label>
+                  <input v-model="form.name" class="form-control" required>
                 </div>
                 <div class="col-md-4">
-                  <input v-model.number="form.price" type="number" class="form-control" placeholder="Giá" required>
+                  <label class="form-label fw-bold">Giá chính (VNĐ)</label>
+                  <input v-model.number="form.price" type="number" class="form-control" required>
                 </div>
                 <div class="col-12">
-                  <input v-model="form.image" class="form-control" placeholder="URL ảnh" required>
+                  <label class="form-label fw-bold">Ảnh chính (URL)</label>
+                  <input v-model="form.image" class="form-control" required>
                 </div>
                 <div class="col-md-6">
-                  <input v-model="form.category" class="form-control" placeholder="Danh mục (tùy chọn)">
+                  <label class="form-label fw-bold">Danh mục</label>
+                  <input v-model="form.category" class="form-control">
                 </div>
                 <div class="col-12">
-                  <textarea v-model="form.description" class="form-control" rows="3" placeholder="Mô tả"></textarea>
+                  <label class="form-label fw-bold">Mô tả</label>
+                  <textarea v-model="form.description" class="form-control" rows="3"></textarea>
                 </div>
               </div>
+
+              <!-- PHẦN BIẾN THỂ (KHÔNG BẮT BUỘC) -->
+              <hr class="my-4">
+              <h5 class="text-primary">Biến thể màu sắc (tùy chọn)</h5>
+              <div v-for="(variant, index) in form.variants" :key="index" class="row g-3 mb-3 align-items-end border p-3 rounded bg-light">
+                <div class="col-md-3">
+                  <label class="form-label">Màu</label>
+                  <input v-model="variant.color" class="form-control" placeholder="Ví dụ: Trắng">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Ảnh biến thể (URL)</label>
+                  <input v-model="variant.image" class="form-control">
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">Giá biến thể</label>
+                  <input v-model.number="variant.price" type="number" class="form-control">
+                </div>  
+                <div class="col-md-1">
+                  <button type="button" @click="removeVariant(index)" class="btn btn-danger btn-sm">
+                    Xóa
+                  </button>
+                </div>
+              </div>
+
+              <button type="button" @click="addVariant" class="btn btn-outline-primary mb-3">
+                + Thêm biến thể màu
+              </button>
+
               <div class="mt-4 text-end">
                 <button type="button" @click="closeModal" class="btn btn-secondary me-2">Hủy</button>
                 <button type="submit" class="btn btn-primary px-4">
@@ -89,47 +125,95 @@
         </div>
       </div>
     </div>
-    <div v-if="showAddModal" class="modal-backdrop fade show" @click="closeModal"></div>
+    <div v-if="showModal" class="modal-backdrop fade show" @click="closeModal"></div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import ProductService from '@/services/ProductService.js'  // Đảm bảo đường dẫn đúng
+import ProductService from '@/services/ProductService.js'
 
 const products = ref([])
-const showAddModal = ref(false)
+const showModal = ref(false)
 const editingProduct = ref(null)
 const form = ref({
   name: '',
   price: 0,
   image: '',
   category: '',
-  description: ''
+  description: '',
+  variants: []  // mảng biến thể
 })
 
 const loadProducts = async () => {
   try {
     const res = await ProductService.list()
     products.value = res.data
-    console.log('Admin load sản phẩm thành công:', products.value)  // Debug để bạn thấy
   } catch (err) {
-    console.error('Lỗi load sản phẩm:', err)
-    alert('Không thể tải sản phẩm. Kiểm tra json-server!')
+    console.error('Lỗi load:', err)
+    alert('Không thể tải sản phẩm!')
   }
 }
 
-// BẮT BUỘC PHẢI GỌI loadProducts TRONG onMounted
-onMounted(() => {
-  loadProducts()
-})
+onMounted(loadProducts)
+
+const openAddModal = () => {
+  editingProduct.value = null
+  form.value = {
+    name: '',
+    price: 0,
+    image: '',
+    category: '',
+    description: '',
+    variants: []
+  }
+  showModal.value = true
+}
+
+const openEditModal = (p) => {
+  editingProduct.value = p
+  form.value = {
+    ...p,
+    variants: p.variants ? p.variants.map(v => ({
+      ...v,
+      sizesStr: v.sizes ? v.sizes.join(', ') : ''
+    })) : []
+  }
+  showModal.value = true
+}
+
+const addVariant = () => {
+  form.value.variants.push({
+    color: '',
+    image: '',
+    price: form.value.price, // mặc định giá chính
+    sizesStr: ''
+  })
+}
+
+const removeVariant = (index) => {
+  form.value.variants.splice(index, 1)
+}
 
 const saveProduct = async () => {
   try {
+    // Xử lý sizes từ chuỗi thành mảng
+    const processedVariants = form.value.variants.map(v => ({
+      color: v.color,
+      image: v.image || form.value.image,
+      price: v.price || form.value.price,
+      sizes: v.sizesStr ? v.sizesStr.split(',').map(s => s.trim()).filter(s => s) : []
+    })).filter(v => v.color) // chỉ giữ biến thể có màu
+
+    const dataToSave = {
+      ...form.value,
+      variants: processedVariants.length > 0 ? processedVariants : undefined
+    }
+
     if (editingProduct.value) {
-      await ProductService.update(editingProduct.value.id, form.value)
+      await ProductService.update(editingProduct.value.id, dataToSave)
     } else {
-      await ProductService.create(form.value)
+      await ProductService.create(dataToSave)
     }
     closeModal()
     loadProducts()
@@ -139,41 +223,24 @@ const saveProduct = async () => {
   }
 }
 
-const editProduct = (p) => {
-  editingProduct.value = p
-  form.value = { ...p }
-  showAddModal.value = true
-}
-
 const removeProduct = async (id) => {
-  if (confirm('Xóa thật chứ?')) {
+  if (confirm('Xóa sản phẩm này thật chứ?')) {
     try {
       await ProductService.delete(id)
       loadProducts()
     } catch (err) {
-      console.error('Lỗi xóa:', err)
       alert('Xóa thất bại!')
     }
   }
 }
 
 const closeModal = () => {
-  showAddModal.value = false
-  editingProduct.value = null
-  form.value = { name: '', price: 0, image: '', category: '', description: '' }
+  showModal.value = false
 }
 
 const formatPrice = (price) => price.toLocaleString('vi-VN')
 </script>
 
 <style scoped>
-.modal-backdrop {
-  background: rgba(0, 0, 0, 0.5);
-}
-.card {
-  border-radius: 16px;
-}
-.btn:hover {
-  transform: translateY(-2px);
-}
+.cursor-pointer { cursor: pointer; }
 </style>

@@ -7,10 +7,8 @@ const api = axios.create({
   baseURL: API_URL,
   timeout: 10000,
   headers: {
-    "Content-Type": "application/json",
-  },
+    "Content-Type": "application/json",},
 });
-
 class ProductService {
   list() {
     return api.get(API_ENDPOINT.products);  // Sửa: dùng api.get + endpoint đúng

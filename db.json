@@ -1,28 +1,64 @@
 {
   "products": [
     {
-      "id": "1",
-      "name": "Áo Thun Nam Cao Cấp",
-      "price": 299000,
-      "image": "https://i.pinimg.com/736x/a9/70/f1/a970f1dd289cc0d48913aab1953ae8de.jpg",
-      "description": "Chất cotton mềm mại, thoáng ",
-      "category": "Áo"
-    },
-    {
       "id": "2",
-      "name": "Quần Jean Rách Nhẹ",
+      "name": "Quần Jean",
       "price": 449000,
-      "image": "https://i.pinimg.com/1200x/a5/63/79/a56379ff0b93ddc6725f976d31699393.jpg",
+      "image": "https://i.pinimg.com/1200x/6b/2c/58/6b2c58683df5798c5af780c209b8b103.jpg",
       "description": "Phong cách trẻ trung",
-      "category": "Quần "
+      "category": "Quần Jean",
+      "variants": [
+        {
+          "color": "Xanh nhạt",
+          "image": "https://i.pinimg.com/1200x/6b/2c/58/6b2c58683df5798c5af780c209b8b103.jpg",
+          "price": 449000,
+          "sizes": [
+            "28",
+            "29",
+            "30",
+            "31",
+            "32"
+          ]
+        },
+        {
+          "color": "Xanh đậm",
+          "image": "https://i.pinimg.com/1200x/88/ff/a8/88ffa862618754b9a1005b986e73ca03.jpg",
+          "price": 469000,
+          "sizes": [
+            "29",
+            "30",
+            "31",
+            "32",
+            "33"
+          ]
+        },
+        {
+          "color": "Đen",
+          "image": "https://i.pinimg.com/1200x/9b/3f/44/9b3f44aab6c91b0b112be8bdc6b05651.jpg",
+          "price": 479000,
+          "sizes": [
+            "28",
+            "30",
+            "32"
+          ]
+        }
+      ]
     },
     {
-      "id": "262a",
-      "name": "Áo sơ mi",
-      "price": 100000,
-      "image": "https://i.pinimg.com/736x/35/20/e8/3520e8a7daca08cb1c71af50d01b0943.jpg",
+      "id": "47b4",
+      "name": "Áo nam",
+      "price": 90000,
+      "image": "https://i.pinimg.com/1200x/11/f8/69/11f8693cfb5a6931e494c6872e2aaa96.jpg",
       "category": "Áo",
-      "description": "Đẹp thoáng mát"
+      "description": "Đẹp",
+      "variants": [
+        {
+          "color": "Trắng",
+          "image": "https://i.pinimg.com/1200x/d9/e0/c4/d9e0c4863b2a207feaeb6490fb87f183.jpg",
+          "price": 120000,
+          "sizes": []
+        }
+      ]
     }
   ]
 }

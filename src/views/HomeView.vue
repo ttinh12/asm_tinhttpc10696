@@ -22,7 +22,6 @@
   </div>
 
   <div class="container">
-    <!-- SẢN PHẨM NỔI BẬT -->
     <section class="py-5">
       <h2 class="text-center mb-5 text-primary fw-bold fs-1">
         <i class="fas fa-crown text-warning me-2"></i>SẢN PHẨM NỔI BẬT
@@ -32,7 +31,6 @@
       </div>
     </section>
 
-    <!-- HÀNG MỚI VỀ -->
     <section class="py-5 bg-light rounded-4">
       <h2 class="text-center mb-5 text-success fw-bold fs-1">
         <i class="fas fa-star text-primary me-2"></i>HÀNG MỚI VỀ

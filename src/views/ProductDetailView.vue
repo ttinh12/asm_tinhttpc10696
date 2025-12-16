@@ -1,58 +1,103 @@
 <template>
   <div class="container py-5" v-if="product">
     <div class="row g-5">
-      <!-- Ảnh sản phẩm -->
+      <!-- Ảnh chính -->
       <div class="col-lg-6">
-        <img
-          :src="product.image"
-          class="img-fluid rounded-4 shadow-lg"
-          alt="product.name"
+        <img 
+          :src="currentImage" 
+          class="img-fluid rounded-4 shadow-lg mb-4" 
           style="max-height: 560px; object-fit: cover; width: 100%;"
-        />
+          alt="product.name"
+        >
+
+        <!-- Thumbnail (ảnh chính + các biến thể) -->
+        <div class="d-flex gap-3 flex-wrap justify-content-center">
+          <!-- Thumbnail ảnh chính (luôn có, để quay lại mặc định) -->
+          <div 
+            @click="resetToDefault"
+            class="border rounded p-1 cursor-pointer"
+            :class="{ 'border-primary border-3': !selectedVariant }"
+          >
+            <img :src="product.image" width="80" height="80" class="rounded object-fit-cover">
+          </div>
+
+          <!-- Thumbnail các biến thể -->
+          <div 
+            v-for="variant in product.variants" 
+            :key="variant.color"
+            @click="selectVariant(variant)"
+            class="border rounded p-1 cursor-pointer"
+            :class="{ 'border-primary border-3': selectedVariant === variant }"
+          >
+            <img :src="variant.image || product.image" width="80" height="80" class="rounded object-fit-cover">
+          </div>
+        </div>
       </div>
 
       <!-- Thông tin sản phẩm -->
       <div class="col-lg-6">
         <h1 class="display-5 fw-bold mb-3">{{ product.name }}</h1>
 
-        <div class="d-flex align-items-center mb-4">
+        <div class="d-flex align-items-center mb-3">
           <div class="text-warning fs-4 me-2">★★★★☆</div>
           <span class="text-muted">| Đã bán 1.2k+</span>
         </div>
 
         <div class="bg-light p-4 rounded-4 mb-4">
           <p class="display-6 text-danger fw-bold mb-0">
-            {{ formatPrice(product.price) }}đ
+            {{ formatPrice(currentPrice) }}đ
           </p>
         </div>
 
-        <p class="fs-5 text-muted mb-4">{{ product.description }}</p>
+        <!-- Chọn màu -->
+        <div class="mb-4">
+          <strong>Màu sắc:</strong>
+          <div class="d-flex gap-3 mt-2 flex-wrap">
+            <!-- Màu mặc định -->
+            <button 
+              @click="resetToDefault"
+              class="btn btn-outline-secondary"
+              :class="{ 'btn-primary': !selectedVariant }"
+            >
+              Mặc định
+            </button>
 
-        <div class="d-flex gap-3">
-          <button @click="addToCart" class="btn btn-danger btn-lg px-5 rounded-pill shadow">
-            <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ hàng
-          </button>
+            <!-- Các màu biến thể -->
+            <button 
+              v-for="variant in product.variants" 
+              :key="variant.color"
+              @click="selectVariant(variant)"
+              class="btn btn-outline-secondary"
+              :class="{ 'btn-primary': selectedVariant === variant }"
+            >
+              {{ variant.color }}
+            </button>
+          </div>
         </div>
 
-        <hr class="my-5" />
-
-        <div class="row text-muted">
-          <div class="col-sm-6 mb-3">
-            <strong>Danh mục:</strong> {{ product.category || 'Thời trang nam' }}
-          </div>
-          <div class="col-sm-6 mb-3">
-            <strong>Giao hàng:</strong> Toàn quốc – Freeship từ 300k
-          </div>
-          <div class="col-sm-6">
-            <strong>Thương hiệu:</strong> TTT Shop
-          </div>
-          <div class="col-sm-6">
-            <strong>Bảo hành:</strong> Đổi trả 7 ngày
+        <!-- Chọn size -->
+        <div v-if="currentSizes.length > 0" class="mb-4">
+          <strong>Kích thước:</strong>
+          <div class="d-flex gap-3 mt-2 flex-wrap">
+            <button 
+              v-for="size in currentSizes" 
+              :key="size"
+              class="btn btn-outline-dark"
+            >
+              {{ size }}
+            </button>
           </div>
         </div>
+
+        <p class="fs-5 text-muted mb-5">{{ product.description }}</p>
+
+        <button @click="addToCart" class="btn btn-danger btn-lg px-5 rounded-pill shadow">
+          Thêm vào giỏ hàng
+        </button>
       </div>
     </div>
   </div>
+
   <div v-else class="text-center py-5">
     <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;"></div>
     <p class="mt-4 fs-4">Đang tải chi tiết sản phẩm...</p>
@@ -63,34 +108,54 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import ProductService from '@/services/ProductService.js'
+
 const route = useRoute()
 const product = ref(null)
+const selectedVariant = ref(null)
+const currentImage = ref('')
+const currentPrice = ref(0)
+const currentSizes = ref([])
 
 onMounted(async () => {
   try {
-   const res = await ProductService.getById(route.params.id)
+    const res = await ProductService.getById(route.params.id)
     product.value = res.data
+
+    // Khởi tạo mặc định từ sản phẩm chính
+    resetToDefault()
   } catch (err) {
     console.error('Không tìm thấy sản phẩm:', err)
     alert('Sản phẩm không tồn tại!')
   }
 })
 
-const formatPrice = (price) => {
-  return Number(price).toLocaleString('vi-VN')
+const resetToDefault = () => {
+  selectedVariant.value = null
+  currentImage.value = product.value.image
+  currentPrice.value = product.value.price
+  currentSizes.value = []
 }
 
+const selectVariant = (variant) => {
+  selectedVariant.value = variant
+  currentImage.value = variant.image || product.value.image
+  currentPrice.value = variant.price || product.value.price
+  currentSizes.value = variant.sizes || []
+}
+
+const formatPrice = (price) => Number(price).toLocaleString('vi-VN')
+
 const addToCart = () => {
-  alert(`Đã thêm "${product.value.name}" vào giỏ hàng!`)
-  // Sau này sẽ dùng Pinia
+  const colorInfo = selectedVariant.value ? ` - ${selectedVariant.value.color}` : ''
+  alert(`Đã thêm "${product.value.name}${colorInfo}" vào giỏ hàng!`)
 }
 </script>
 
 <style scoped>
-.img-fluid {
-  transition: transform 0.4s ease;
+.cursor-pointer {
+  cursor: pointer;
 }
-.img-fluid:hover {
-  transform: scale(1.03);
+.object-fit-cover {
+  object-fit: cover;
 }
-</style>
+</style>  

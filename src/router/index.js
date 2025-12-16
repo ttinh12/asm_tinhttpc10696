@@ -16,10 +16,8 @@ const routes = [
   { path: '/admin', name: 'admin', component: AdminView },
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
-
 const router = createRouter({
   history: createWebHistory(),
   routes
 })
-
 export default router

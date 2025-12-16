@@ -18,13 +18,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import ProductCard from '@/components/Product/ProductCard.vue'
-import ProductService from '@/services/ProductService.js'  // <-- Đổi import thành Service mới
+import ProductService from '@/services/ProductService.js'  
 
 const products = ref([])
 
 onMounted(async () => {
   try {
-    const res = await ProductService.list()  // <-- Đổi gọi hàm thành .list()
+    const res = await ProductService.list()  
     products.value = res.data
   } catch (err) {
     console.error('Lỗi tải sản phẩm:', err)

@@ -52,7 +52,7 @@
       </div>
     </div>
 
-    <!-- Modal Thêm/Sửa (có phần biến thể) -->
+    <!-- Modal Thêm/Sửa -->
     <div class="modal fade" :class="{ 'show d-block': showModal }" tabindex="-1" v-if="showModal">
       <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -87,7 +87,7 @@
                 </div>
               </div>
 
-              <!-- PHẦN BIẾN THỂ (KHÔNG BẮT BUỘC) -->
+              <!-- PHẦN BIẾN THỂ (TÙY CHỌN) -->
               <hr class="my-4">
               <h5 class="text-primary">Biến thể màu sắc (tùy chọn)</h5>
               <div v-for="(variant, index) in form.variants" :key="index" class="row g-3 mb-3 align-items-end border p-3 rounded bg-light">
@@ -102,7 +102,11 @@
                 <div class="col-md-2">
                   <label class="form-label">Giá biến thể</label>
                   <input v-model.number="variant.price" type="number" class="form-control">
-                </div>  
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">Size (cách nhau dấu phẩy)</label>
+                  <input v-model="variant.sizesStr" class="form-control" placeholder="M,L,XL">
+                </div>
                 <div class="col-md-1">
                   <button type="button" @click="removeVariant(index)" class="btn btn-danger btn-sm">
                     Xóa
@@ -142,7 +146,7 @@ const form = ref({
   image: '',
   category: '',
   description: '',
-  variants: []  // mảng biến thể
+  variants: []
 })
 
 const loadProducts = async () => {
@@ -186,7 +190,7 @@ const addVariant = () => {
   form.value.variants.push({
     color: '',
     image: '',
-    price: form.value.price, // mặc định giá chính
+    price: form.value.price,
     sizesStr: ''
   })
 }
@@ -197,13 +201,12 @@ const removeVariant = (index) => {
 
 const saveProduct = async () => {
   try {
-    // Xử lý sizes từ chuỗi thành mảng
     const processedVariants = form.value.variants.map(v => ({
       color: v.color,
       image: v.image || form.value.image,
       price: v.price || form.value.price,
       sizes: v.sizesStr ? v.sizesStr.split(',').map(s => s.trim()).filter(s => s) : []
-    })).filter(v => v.color) // chỉ giữ biến thể có màu
+    })).filter(v => v.color)
 
     const dataToSave = {
       ...form.value,

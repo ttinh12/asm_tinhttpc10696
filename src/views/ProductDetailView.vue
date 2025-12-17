@@ -1,29 +1,29 @@
 <template>
   <div class="container py-5" v-if="product">
     <div class="row g-5">
-      <!-- Ảnh chính -->
+      <!-- Ảnh chính + thumbnail -->
       <div class="col-lg-6">
         <img 
           :src="currentImage" 
           class="img-fluid rounded-4 shadow-lg mb-4" 
           style="max-height: 560px; object-fit: cover; width: 100%;"
-          alt="product.name"
+          :alt="product.name"
         >
 
-        <!-- Thumbnail (ảnh chính + các biến thể) -->
+        <!-- Thumbnail: ảnh chính + các biến thể -->
         <div class="d-flex gap-3 flex-wrap justify-content-center">
-          <!-- Thumbnail ảnh chính (luôn có, để quay lại mặc định) -->
+          <!-- Ảnh chính (mặc định) -->
           <div 
             @click="resetToDefault"
             class="border rounded p-1 cursor-pointer"
-            :class="{ 'border-primary border-3': !selectedVariant }"
+            :class="{ 'border-primary border-3': selectedVariant === null }"
           >
             <img :src="product.image" width="80" height="80" class="rounded object-fit-cover">
           </div>
 
-          <!-- Thumbnail các biến thể -->
+          <!-- Các biến thể -->
           <div 
-            v-for="variant in product.variants" 
+            v-for="variant in product.variants || []" 
             :key="variant.color"
             @click="selectVariant(variant)"
             class="border rounded p-1 cursor-pointer"
@@ -53,18 +53,15 @@
         <div class="mb-4">
           <strong>Màu sắc:</strong>
           <div class="d-flex gap-3 mt-2 flex-wrap">
-            <!-- Màu mặc định -->
             <button 
               @click="resetToDefault"
               class="btn btn-outline-secondary"
-              :class="{ 'btn-primary': !selectedVariant }"
+              :class="{ 'btn-primary': selectedVariant === null }"
             >
               Mặc định
             </button>
-
-            <!-- Các màu biến thể -->
             <button 
-              v-for="variant in product.variants" 
+              v-for="variant in product.variants || []" 
               :key="variant.color"
               @click="selectVariant(variant)"
               class="btn btn-outline-secondary"
@@ -79,11 +76,7 @@
         <div v-if="currentSizes.length > 0" class="mb-4">
           <strong>Kích thước:</strong>
           <div class="d-flex gap-3 mt-2 flex-wrap">
-            <button 
-              v-for="size in currentSizes" 
-              :key="size"
-              class="btn btn-outline-dark"
-            >
+            <button v-for="size in currentSizes" :key="size" class="btn btn-outline-dark">
               {{ size }}
             </button>
           </div>
@@ -108,6 +101,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import ProductService from '@/services/ProductService.js'
+import { useCartStore } from '@/stores/cart.js'  // <-- THÊM DÒNG NÀY
 
 const route = useRoute()
 const product = ref(null)
@@ -116,12 +110,12 @@ const currentImage = ref('')
 const currentPrice = ref(0)
 const currentSizes = ref([])
 
+const cartStore = useCartStore()  // <-- THÊM DÒNG NÀY
+
 onMounted(async () => {
   try {
     const res = await ProductService.getById(route.params.id)
     product.value = res.data
-
-    // Khởi tạo mặc định từ sản phẩm chính
     resetToDefault()
   } catch (err) {
     console.error('Không tìm thấy sản phẩm:', err)
@@ -146,8 +140,7 @@ const selectVariant = (variant) => {
 const formatPrice = (price) => Number(price).toLocaleString('vi-VN')
 
 const addToCart = () => {
-  const colorInfo = selectedVariant.value ? ` - ${selectedVariant.value.color}` : ''
-  alert(`Đã thêm "${product.value.name}${colorInfo}" vào giỏ hàng!`)
+  cartStore.addToCart(product.value, selectedVariant.value)  // <-- THAY ALERT THÀNH DÒNG NÀY
 }
 </script>
 
@@ -158,4 +151,4 @@ const addToCart = () => {
 .object-fit-cover {
   object-fit: cover;
 }
-</style>  
+</style>

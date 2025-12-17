@@ -5,7 +5,20 @@
     </h1>
 
     <div v-if="products.length > 0" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4 g-lg-5">
-      <ProductCard v-for="p in products" :key="p.id" :product="p" />
+      <div v-for="p in products" :key="p.id" class="col">
+        <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+          <router-link :to="`/product/${p.id}`">
+            <img :src="p.image" class="card-img-top" style="height: 300px; object-fit: cover;" :alt="p.name">
+          </router-link>
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title fw-bold">{{ p.name }}</h5>
+            <p class="card-text text-danger fw-bold fs-4 mt-auto">{{ formatPrice(p.price) }}đ</p>
+            <button @click.stop="addToCart(p)" class="btn btn-danger mt-3 rounded-pill">
+              Thêm vào giỏ hàng
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div v-else class="text-center py-5">
@@ -17,10 +30,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import ProductCard from '@/components/Product/ProductCard.vue'
-import ProductService from '@/services/ProductService.js'  
+import ProductService from '@/services/ProductService.js'
+import { useCartStore } from '@/stores/cart.js'  // <-- THÊM DÒNG NÀY
 
 const products = ref([])
+const cartStore = useCartStore()  // <-- THÊM DÒNG NÀY
 
 onMounted(async () => {
   try {
@@ -31,4 +45,18 @@ onMounted(async () => {
     alert('Không thể tải sản phẩm. Kiểm tra json-server!')
   }
 })
+
+const addToCart = (product) => {
+  cartStore.addToCart(product)  // <-- THAY ALERT THÀNH DÒNG NÀY
+}
+
+const formatPrice = (price) => price.toLocaleString('vi-VN')
 </script>
+
+<style scoped>
+.card:hover {
+  transform: translateY(-8px);
+  transition: transform 0.3s ease;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+</style>

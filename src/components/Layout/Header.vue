@@ -9,13 +9,13 @@
 
       <div class="d-flex align-items-center gap-3">
         <router-link to="/admin" class="btn btn-warning btn-sm">
-          <i class="fas fa-cogs me-1"></i>Quản trị
+          Quản trị
         </router-link>
 
         <router-link to="/cart" class="btn btn-outline-light position-relative">
-          <i class="fas fa-shopping-cart"></i> Giỏ hàng
+          Giỏ hàng
           <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            0
+            {{ cartStore.cartCount }}
           </span>
         </router-link>
       </div>
@@ -24,4 +24,6 @@
 </template>
 
 <script setup>
+import { useCartStore } from '@/stores/cart.js'
+const cartStore = useCartStore()
 </script>
